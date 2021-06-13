@@ -1,0 +1,26 @@
+val df1 = spark.read.format("json").load("/home/ttaranto/hadoop_data/mySample1.json")
+
+
+# Pourcentage de citoyen trop contents
+df1.select(explode($"list_positivite")).where(col("col")>90).count.toFloat / df1.select(explode($"list_positivite")).count.toFloat
+
+
+# La ville avec le plus de citoyen content
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
