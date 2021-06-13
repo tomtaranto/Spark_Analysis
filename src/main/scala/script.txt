@@ -1,19 +1,26 @@
-val df1 = spark.read.format("json").load("/home/ttaranto/hadoop_data/mySample1.json")
+# TOM
+val df = spark.read.format("json").load("/home/ttaranto/hadoop_data/mySample1.json").withColumn("personne",explode(arrays_zip(col("list_id"),col("list_nom"),col("list_prenom"),col("list_positivite")))).select("personne.list_id","personne.list_nom","personne.list_prenom","personne.list_positivite", "battery", "id_drone","timestamp", "ville").withColumnRenamed("list_nom", "nom").withColumnRenamed("list_prenom", "prenom").withColumnRenamed("list_positivite", "positivite").withColumnRenamed("list_id", "id")
+
+
+# EDDY
+val df = spark.read.format("json").load("/Users/eddy/Desktop/json_peaceland/mySample1.json").withColumn("personne",explode(arrays_zip(col("list_id"),col("list_nom"),col("list_prenom"),col("list_positivite")))).select("personne.list_id","personne.list_nom","personne.list_prenom","personne.list_positivite", "battery", "id_drone","timestamp", "ville").withColumnRenamed("list_nom", "nom").withColumnRenamed("list_prenom", "prenom").withColumnRenamed("list_positivite", "positivite").withColumnRenamed("list_id", "id")
 
 
 # Pourcentage de citoyen trop contents
-df1.select(explode($"list_positivite")).where(col("col")>90).count.toFloat / df1.select(explode($"list_positivite")).count.toFloat
+df.where(col("positivite") > 90).count.toFloat / df.count.toFloat
 
 
 # La ville avec le plus de citoyen content
+df.where(col("positivite") > 90).groupBy("ville").count().orderBy(desc("count"))
 
 
+# Le citoyen le plus content (soit par moyenne de content, soit par max_occurence de content)
+df.groupBy("id").agg(sum("positivite"), count("id")).withColumn("avg_positivite", $"sum(positivite)" / $"count(id)").orderBy(desc("avg_positivite"))
+df.groupBy("id").agg(sum("positivite"), count("id")).orderBy(desc("count(id)"))
 
 
-
-
-
-
+# L'heure ou les citoyens sont les plus contents
+df.groupBy("timestamp").count.orderBy(desc("count"))
 
 
 
