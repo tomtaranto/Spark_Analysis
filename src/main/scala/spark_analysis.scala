@@ -6,12 +6,13 @@ import org.apache.log4j.Level
 
 
 object spark_analysis extends App{
-
+  Logger.getLogger("org").setLevel(Level.OFF)
+  Logger.getLogger("akka").setLevel(Level.OFF)
+  println("starting Spark Session")
   val spark = SparkSession.builder.appName("Simple Application").master("local[*]")getOrCreate()
   //val df = spark.read.format("json").load("/home/ttaranto/hadoop_data/*.json")
 
-  Logger.getLogger("org").setLevel(Level.OFF)
-  Logger.getLogger("akka").setLevel(Level.OFF)
+
   println("Chargement des données")
   val df1 = spark.read.format("json").load("hdfs://localhost:9000/tmp/*.json")
   //val df1 = spark.read.format("json").load("/home/ttaranto/hadoop_data/mySample*.json")
