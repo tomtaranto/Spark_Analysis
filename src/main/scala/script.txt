@@ -1,4 +1,8 @@
-val df1 = spark.read.format("json").load("/home/ttaranto/hadoop_data/mySample1.json")
+import spark.sqlContext.implicits._
+import org.apache.spark.sql.functions._
+
+
+val df1 = spark.read.format("json").load("/home/ttaranto/hadoop_data/*.json")
 
 
 # Pourcentage de citoyen trop contents
@@ -6,21 +10,24 @@ df1.select(explode($"list_positivite")).where(col("col")>90).count.toFloat / df1
 
 
 # La ville avec le plus de citoyen content
+df.groupBy(col("ville")).count.show
+
+
+
+val df = df1.withColumn("personne",explode(arrays_zip(col("list_id"),col("list_nom"),col("list_prenom"),col("list_positivite")))).select(col("personne.list_id").as("id"),col("personne.list_nom").as("nom"),col("personne.list_prenom").as("prenom"),col("personne.list_positivite").as("positivite"), col("battery"), col("id_drone"),col("timestamp"), col("ville"))
 
 
 
 
+# Le citoyen le plus content (soit par moyenne de content, soit par max_occurence de content)
+df.where(col("positivite") > 90).groupBy("id").agg(count("id").as("count"),first("nom").as("nom"),first("prenom").as("prenom"),first("ville").as("ville"),first("id_drone").as("id_drone")).orderBy(desc("count")).show()
 
 
 
+# L'heure ou les citoyens sont les plus contents
 
 
+# Convertisseur string -> timestamp
+val df_corrected = df.withColumn("new_timestamp",to_timestamp(col("timestamp"),"dd/MM/yyyy hh:mm a"))
 
-
-
-
-
-
-
-
-
+df_corrected.groupBy(hour(col("new_timestamp")).alias("heure_detection")).count.orderBy(asc("heure_detection")).show(30)
